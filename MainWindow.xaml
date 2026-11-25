@@ -1,0 +1,222 @@
+<Window x:Class="PhotoFileManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sony Photo File Manager - Tìm kiếm &amp; Sao chép JPEG / RAW"
+        Height="780" Width="1080" MinHeight="660" MinWidth="920"
+        WindowStartupLocation="CenterScreen" Background="#F4F6F9">
+    <Window.Resources>
+        <SolidColorBrush x:Key="CardBg" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BorderGray" Color="#DCE2EA"/>
+        <SolidColorBrush x:Key="AccentBlue" Color="#1D5BD6"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#1E293B"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#64748B"/>
+
+        <Style x:Key="SectionCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="PrimaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,9"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="SecondaryBtn" TargetType="Button">
+            <Setter Property="Background" Value="#EEF2F7"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource SectionCard}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="SONY PHOTO FILE MANAGER" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text="Tìm kiếm và sao chép ảnh JPEG / RAW theo tên • Không xóa file gốc • Không ghi đè file đích"
+                               FontSize="12.5" Foreground="{StaticResource TextMuted}" Margin="0,3,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="1" Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="6" Padding="10,6" VerticalAlignment="Center">
+                    <TextBlock Text="RAW: CR3, CR2, NEF, ARW, DNG | Có thư mục con | Xuất CSV + TXT"
+                               FontSize="11.5" FontWeight="SemiBold" Foreground="#065F46"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="0,0,0,12" Background="Transparent" BorderThickness="0">
+            <TabItem Header="Chế độ 1: JPEG ↔ RAW" Padding="14,8" FontWeight="SemiBold">
+                <Border Style="{StaticResource SectionCard}" Margin="0,6,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Chọn hướng chuyển đổi (tự động quét tên file trong thư mục nguồn tương ứng, bao gồm thư mục con):"
+                                   Foreground="{StaticResource TextMuted}" Margin="0,0,0,10"/>
+                        <WrapPanel>
+                            <RadioButton x:Name="RbJpegToRaw" Content="JPEG → RAW (Lấy tên từ thư mục JPEG nguồn, tìm và copy RAW sang thư mục RAW đích)"
+                                         IsChecked="True" FontSize="13" Margin="0,0,24,6"/>
+                            <RadioButton x:Name="RbRawToJpeg" Content="RAW → JPEG (Lấy tên từ thư mục RAW nguồn, tìm và copy JPEG sang thư mục JPEG đích)"
+                                         FontSize="13" Margin="0,0,0,6"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
+            <TabItem Header="Chế độ 2: TEXT → JPEG + RAW" Padding="14,8" FontWeight="SemiBold">
+                <Border Style="{StaticResource SectionCard}" Margin="0,6,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="115"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                            <TextBlock Text="Danh sách tên ảnh (mỗi dòng 1 tên, dán trực tiếp từ Excel/TXT; tự bỏ đuôi file và khử trùng tên):"
+                                       Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                <Button Content="Nạp file TXT..." Style="{StaticResource SecondaryBtn}" Click="BtnLoadTxt_Click" Margin="0,0,6,0"/>
+                                <Button Content="Dán từ Clipboard" Style="{StaticResource SecondaryBtn}" Click="BtnPasteClipboard_Click" Margin="0,0,6,0"/>
+                                <Button Content="Xóa danh sách" Style="{StaticResource SecondaryBtn}" Click="BtnClearList_Click"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <TextBox x:Name="TxtImageNames" Grid.Row="1" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 FontFamily="Consolas" FontSize="13" Padding="8" BorderBrush="#CBD5E1"
+                                 Text="IMG_1024&#x0a;IMG_1025&#x0a;IMG_1026&#x0a;IMG_1027"/>
+                    </Grid>
+                </Border>
+            </TabItem>
+
+            <TabItem Header="Chế độ 3: Cấu hình thư mục" Padding="14,8" FontWeight="SemiBold">
+                <Border Style="{StaticResource SectionCard}" Margin="0,6,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Thư mục JPEG nguồn:" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                        <TextBox x:Name="TxtJpegSource" Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" Padding="6" TextChanged="FolderPath_TextChanged"/>
+                        <Button Grid.Row="0" Grid.Column="2" Content="Chọn..." Style="{StaticResource SecondaryBtn}" Margin="0,0,0,8" Click="BrowseFolder_Click" Tag="JpegSource"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Thư mục RAW nguồn:" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                        <TextBox x:Name="TxtRawSource" Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" Padding="6" TextChanged="FolderPath_TextChanged"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="Chọn..." Style="{StaticResource SecondaryBtn}" Margin="0,0,0,8" Click="BrowseFolder_Click" Tag="RawSource"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Thư mục JPEG đích:" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                        <TextBox x:Name="TxtJpegDest" Grid.Row="2" Grid.Column="1" Margin="0,0,8,8" Padding="6" TextChanged="FolderPath_TextChanged"/>
+                        <Button Grid.Row="2" Grid.Column="2" Content="Chọn..." Style="{StaticResource SecondaryBtn}" Margin="0,0,0,8" Click="BrowseFolder_Click" Tag="JpegDest"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Thư mục RAW đích:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox x:Name="TxtRawDest" Grid.Row="3" Grid.Column="1" Margin="0,0,8,0" Padding="6" TextChanged="FolderPath_TextChanged"/>
+                        <Button Grid.Row="3" Grid.Column="2" Content="Chọn..." Style="{StaticResource SecondaryBtn}" Margin="0,0,0,0" Click="BrowseFolder_Click" Tag="RawDest"/>
+                    </Grid>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <Border Grid.Row="2" Style="{StaticResource SectionCard}" Margin="0,0,0,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <UniformGrid Grid.Row="0" Columns="4" Margin="0,0,0,10">
+                    <Border Background="#EFF6FF" CornerRadius="6" Padding="10" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="TỔNG YÊU CẦU" FontSize="11" FontWeight="Bold" Foreground="#1E40AF"/>
+                            <TextBlock x:Name="LblTotal" Text="0" FontSize="22" FontWeight="Bold" Foreground="#1E3A8A"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#ECFDF5" CornerRadius="6" Padding="10" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="ĐÃ COPY" FontSize="11" FontWeight="Bold" Foreground="#065F46"/>
+                            <TextBlock x:Name="LblCopied" Text="0" FontSize="22" FontWeight="Bold" Foreground="#047857"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#FEF2F2" CornerRadius="6" Padding="10" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="KHÔNG TÌM THẤY" FontSize="11" FontWeight="Bold" Foreground="#991B1B"/>
+                            <TextBlock x:Name="LblMissing" Text="0" FontSize="22" FontWeight="Bold" Foreground="#B91C1C"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#FFFBEB" CornerRadius="6" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="BỎ QUA (ĐÃ TỒN TẠI)" FontSize="11" FontWeight="Bold" Foreground="#92400E"/>
+                            <TextBlock x:Name="LblSkipped" Text="0" FontSize="22" FontWeight="Bold" Foreground="#B45309"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <DockPanel Grid.Row="1" Margin="0,0,0,8">
+                    <TextBlock Text="Bộ lọc báo cáo:" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"
+                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <RadioButton x:Name="RbFilterAll" Content="Tất cả" IsChecked="True"
+                                     Margin="0,0,16,0" Checked="ReportFilter_Changed"/>
+                        <RadioButton x:Name="RbFilterMissing" Content="Chỉ thiếu file"
+                                     Margin="0,0,16,0" Checked="ReportFilter_Changed"/>
+                        <RadioButton x:Name="RbFilterDuplicate" Content="Chỉ trùng tên ở thư mục con"
+                                     Checked="ReportFilter_Changed"/>
+                    </StackPanel>
+                </DockPanel>
+
+                <DataGrid x:Name="GridReport" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column" BorderBrush="#E2E8F0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tên ảnh" Binding="{Binding BaseName}" Width="180"/>
+                        <DataGridTextColumn Header="Loại" Binding="{Binding Kind}" Width="90"/>
+                        <DataGridTextColumn Header="Trạng thái" Binding="{Binding Status}" Width="160"/>
+                        <DataGridTextColumn Header="Đường dẫn nguồn / Ghi chú" Binding="{Binding Detail}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock x:Name="LblStatus" Text="Sẵn sàng." FontSize="12.5" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,4"/>
+                <ProgressBar x:Name="ProgressBarMain" Height="10" Minimum="0" Maximum="100" Value="0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <CheckBox x:Name="ChkOpenDestAfterDone" Content="Tự động mở thư mục đích"
+                          VerticalAlignment="Center" Margin="0,0,14,0" FontSize="12.5"/>
+                <Button x:Name="BtnExportReport" Content="Xuất báo cáo (CSV + TXT)" Style="{StaticResource SecondaryBtn}"
+                        Padding="12,9" Margin="0,0,8,0" Click="BtnExportReport_Click" IsEnabled="False"/>
+                <Button x:Name="BtnRun" Content="Bắt đầu xử lý" Style="{StaticResource PrimaryBtn}" Click="BtnRun_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
